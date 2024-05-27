@@ -22,6 +22,7 @@ declare interface Vault {
   description: string
   algorithm: 'aes'
   password: string
+  updatedAt: Date
 }
 
 declare type theme = 'light' | 'dark' | 'system'

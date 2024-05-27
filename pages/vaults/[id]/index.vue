@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { v4 } from 'uuid'
 import { itemSchema } from '~/validators/item'
+import { calculateItemSize, prettySize } from '~/utils/helpers/calculateSize'
 
 declare const createVaultModal: HTMLDialogElement
 
@@ -43,7 +44,7 @@ function handleCreateItem() {
     })
 
     if (!error) {
-      createNewVaultItem(vault.value.id, {
+      createNewVaultItem({
         vaultId: _value.vaultId,
         id: _value.id,
         data: encryptItem({
@@ -52,6 +53,8 @@ function handleCreateItem() {
           label: _value.label,
           type: _value.type,
           value: _value.value,
+          updatedAt: new Date(),
+          createdAt: new Date(),
         } as Item, password.value),
       })
 
@@ -79,7 +82,7 @@ function requestPassword() {
       updateItems()
     }
     else {
-    // eslint-disable-next-line no-alert
+      // eslint-disable-next-line no-alert
       alert('Password you entered is incorrect')
       requestPassword()
     }
@@ -103,15 +106,16 @@ function handleDeleteItem(itemId: string) {
 onMounted(() => {
   vault.value = getVaultById(route.params.id as string)
   mounted.value = true
+
+  if (!vault.value)
+    return navigateTo('/')
+
   const storedPassword = passwordStore.getPassword(vault.value.id)
   if (storedPassword && compareHash(storedPassword, vault.value.password)) {
     password.value = storedPassword
     updateItems()
   }
   else { requestPassword() }
-
-  if (!vault.value)
-    return navigateTo('/')
 })
 </script>
 
@@ -122,20 +126,16 @@ onMounted(() => {
         <h1 v-if="!items || items.length < 1">
           Your vault currently empty
         </h1>
-        <div v-for="item in items" v-else :key="item.id" class="p-2 w-full md:w-1/2 lg:w-1/3">
-          <div class="border rounded-lg flex flex-row items-center justify-between p-4 dark:border-gray-600">
-            <div class="w-full me-2">
-              <p class="font-semibold">
-                {{ item.label }}
-              </p>
-              <small>{{ item.value }}</small>
-            </div>
-            <div class="flex gap-2">
-              <UIIconButton class="text-white bg-red-700" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
-              <!-- <UIIconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" /> -->
-            </div>
-          </div>
-        </div>
+        <UIItem
+          v-for="item in items"
+          v-else
+          :key="item.id"
+          class="md:w-1/2 lg:w-1/3"
+          :label="item.label"
+          :description="item.value"
+        >
+          <UIIconButton class="text-white bg-red-700" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
+        </UIItem>
       </div>
     </UICard>
   </UIContainer>

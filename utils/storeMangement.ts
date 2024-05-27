@@ -1,57 +1,46 @@
-export function isValidVault(vault: Record<string, any>): boolean {
-  if (typeof vault.id !== 'string' || !vault.id)
+// import { itemSchema } from '~/validators/item'
+import { vaultSchemaHashedPassword } from '~/validators/vault'
+
+// function checkItem(item: any): false | Item {
+//   const { error, value } = itemSchema.validate(item)
+//   if (error) {
+//     console.warn(`Skipping ${value.label}, ${error.message}`)
+//     return false
+//   }
+//   else { return value }
+// }
+
+function checkVault(vault: any): false | Vault {
+  const { error, value } = vaultSchemaHashedPassword.validate(vault)
+  if (error) {
+    console.warn(`Skipping ${value.title}, ${error.message}`)
     return false
-
-  if (typeof vault.title !== 'string' || !vault.title)
-    return false
-
-  if (typeof vault.description !== 'string' || !vault.description)
-    return false
-
-  if (typeof vault.algorithm !== 'string' || !['aes'].includes(vault.algorithm))
-    return false
-
-  return true
-}
-
-export function isValidDecryptedItem(item: Record<string, any>): boolean {
-  if (typeof item.label !== 'string' || !item.label)
-    return false
-
-  if (typeof item.vaultId !== 'string' || !item.label)
-    return false
-
-  if (typeof item.type !== 'string' || !['text', 'password'].includes(item.type))
-    return false
-
-  if (typeof item.value !== 'string')
-    return false
-
-  return true
-}
-
-export function isValidItem(item: Record<string, any>): boolean {
-  const vault = getVaultById(item.vaultId)
-  return vault ? typeof item.data === 'string' : false
+  }
+  else {
+    return {
+      password: vault.password,
+      ...value,
+    }
+  }
 }
 
 export function getVaultList(): Vault[] {
-  const stringVaults = localStorage.getItem('storehouse-vaults') || '[]'
+  try {
+    const stringVaults = localStorage.getItem('storehouse-vaults') || '[]'
+    const vaults = JSON.parse(stringVaults) as Vault[]
+    const output: Vault[] = []
 
-  if (typeof stringVaults !== 'string')
-    throw new Error('syntax error')
+    for (const vault of vaults) {
+      const checkedVault = checkVault(vault)
+      checkedVault && output.push(checkedVault)
+    }
 
-  const vaults = JSON.parse(stringVaults) as Vault[]
-  const output: Vault[] = []
-
-  for (const vault of vaults) {
-    if (isValidVault(vault))
-      output.push(vault)
-    else
-      throw new Error('syntax error')
+    return output
   }
-
-  return output
+  catch (error) {
+    saveVaults([])
+    return []
+  }
 }
 
 export function getItemList(vaultId: string) {
@@ -64,12 +53,8 @@ export function getItemList(vaultId: string) {
   items = items.filter(x => x.vaultId === vaultId)
   const output: EncryptedItem[] = []
 
-  for (const item of items) {
-    if (isValidItem(item))
-      output.push(item)
-    else
-      throw new Error('syntax error')
-  }
+  for (const item of items)
+    output.push(item)
 
   return output
 }
@@ -83,38 +68,33 @@ export function getItems() {
   const items = JSON.parse(stringItems) as EncryptedItem[]
   const output: EncryptedItem[] = []
 
-  for (const item of items) {
-    if (isValidItem(item))
-      output.push(item)
-    else
-      throw new Error('syntax error')
-  }
+  for (const item of items)
+    output.push(item)
 
   return output
 }
 
-export function createNewVaultItem(vaultId: string, item: EncryptedItem): void {
-  if (isValidItem(item)) {
-    const items = getItems()
+export function createNewVaultItem(item: EncryptedItem): void {
+  const items = getItems()
 
-    if (!Array.isArray(items))
-      throw new Error('something error')
-
-    items.push(item)
-    saveVaultItems(items)
-  }
+  if (!Array.isArray(items))
+    throw new Error('something error')
+  items.push(item)
+  saveVaultItems(items)
 }
 
 export function createNewVault(details: Vault, callbackfn: (vault: Vault[]) => void) {
-  if (isValidVault(details)) {
+  const checkedVaultDetails = checkVault(details)
+
+  if (checkedVaultDetails) {
     const vaults = getVaultList()
-    vaults.push(details)
+    vaults.push(checkedVaultDetails)
     saveVaults(vaults)
     callbackfn(vaults)
   }
 }
 
-export function getVaultById(id: string) {
+export function getVaultById(id: string): Vault | null {
   const vaults = getVaultList()
   return vaults.filter(x => x.id === id)[0] || null
 }
@@ -127,4 +107,14 @@ export function saveVaults(vaults: Vault[]) {
 export function saveVaultItems(items: EncryptedItem[]) {
   const stringify = JSON.stringify(items)
   localStorage.setItem(`storehouse-items`, stringify)
+}
+
+export function getItemById(id: string): EncryptedItem | null {
+  try {
+    const items = JSON.parse(localStorage.getItem(id) || '[]') as EncryptedItem[]
+    return items.filter(x => x.id === id)[0]
+  }
+  catch {
+    return null
+  }
 }

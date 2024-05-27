@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { v4 } from 'uuid'
+import moment from 'moment'
 import { vaultSchema } from '~/validators/vault'
+import { calculateVaultSize, prettySize } from '~/utils/helpers/calculateSize'
 
 declare const createVaultModal: HTMLDialogElement
 
@@ -38,6 +40,7 @@ function handleCreateVault() {
     title: title.value,
     password: password.value,
     description: description.value,
+    updatedAt: new Date(),
   })
 
   if (!error) {
@@ -48,6 +51,7 @@ function handleCreateVault() {
       description: description.value,
       algorithm: 'aes',
       id: value.id,
+      updatedAt: value.updatedAt,
       password: hash(password.value!),
     }, (vaultList) => {
       vaults.value = vaultList
@@ -71,20 +75,18 @@ onMounted(() => {
   <UIContainer class="mt-0">
     <UICard header-title="Vaults">
       <div class="flex flex-wrap max-h-[500px] overflow-auto" aria-label="vaults">
-        <div v-for="item in vaults" :key="item?.id" class="p-2 w-full md:w-1/2 lg:w-1/3">
-          <div class="border rounded-lg flex flex-row items-center justify-between p-4 dark:border-gray-600">
-            <div class="ms-2">
-              <p class="font-semibold">
-                {{ item.title }}
-              </p>
-              <small>{{ item.description }}</small>
-            </div>
-            <div class="flex gap-2">
-              <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" />
-              <UIIconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
-            </div>
-          </div>
-        </div>
+        <UIItem
+          v-for="item in vaults"
+          :key="item?.id"
+          :description="item.description"
+          :label="item.title"
+          :footer-text-start="`Updated At: ${moment(item.updatedAt).format('YYYY/MM/DD hh:mm A')}`"
+          :footer-text-end="prettySize(calculateVaultSize(item.id)!)"
+          class="md:w-1/2 lg:w-1/3"
+        >
+          <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" />
+          <UIIconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
+        </UIItem>
         <span v-if="!vaults.length">
           You don't have any vaults yet, <a href="#" class="text-blue-600" @click="$event.preventDefault(), handleShowModal()">Create One</a>.
         </span>
