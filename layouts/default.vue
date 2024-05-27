@@ -6,10 +6,25 @@ useHead({
 </script>
 
 <template>
-  <Body class="font-poppins dark:text-white dark:bg-gray-950">
-    <header aria-label="content header">
-      <NavigationsHeader />
-    </header>
-    <slot />
+  <Body class="font-poppins dark:text-white dark:bg-gray-950 flex">
+    <div class="flex flex-col h-full w-full">
+      <header aria-label="content header">
+        <NavigationsHeader />
+      </header>
+      <slot />
+    </div>
   </Body>
 </template>
+
+<style>
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body > div#__nuxt {
+  width: 100%;
+  flex: 1;
+  flex-grow: 3;
+}
+</style>

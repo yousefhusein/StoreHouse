@@ -72,7 +72,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <UIContainer class="mt-0">
+  <UIContainer class="pb-3 h-full">
     <UICard header-title="Vaults">
       <div class="flex flex-wrap max-h-[500px] overflow-auto" aria-label="vaults">
         <UIItem

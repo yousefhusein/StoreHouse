@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { v4 } from 'uuid'
 import { itemSchema } from '~/validators/item'
-import { calculateItemSize, prettySize } from '~/utils/helpers/calculateSize'
 
 declare const createVaultModal: HTMLDialogElement
 
@@ -120,9 +119,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <UIContainer class="mt-0">
-    <UICard v-if="vault && password" :header-title="vault.title">
-      <div class="flex flex-wrap max-h-[500px] overflow-auto" aria-label="vaults">
+  <UIContainer class="mt-0 h-full">
+    <UICard v-if="vault && password" class="h-full" :header-title="vault.title">
+      <div class="flex flex-wrap h-full overflow-auto" aria-label="vaults">
         <h1 v-if="!items || items.length < 1">
           Your vault currently empty
         </h1>
