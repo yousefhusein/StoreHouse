@@ -1,5 +1,3 @@
-import prettyBytes from 'pretty-bytes'
-
 export function calculateVaultSize(vaultId: string) {
   const vault = getVaultById(vaultId)
 

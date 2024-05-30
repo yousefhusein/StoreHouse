@@ -1,4 +1,6 @@
 // import { itemSchema } from '~/validators/item'
+import { compare } from '@yousefhusain/md5'
+import yaml from 'js-yaml'
 import { vaultSchemaHashedPassword } from '~/validators/vault'
 
 // function checkItem(item: any): false | Item {
@@ -109,10 +111,48 @@ export function saveVaultItems(items: EncryptedItem[]) {
   localStorage.setItem(`storehouse-items`, stringify)
 }
 
+export function addItems(items: EncryptedItem[]) {
+  const itemList = getItems()
+  items && itemList.push(...items)
+  saveVaultItems(items)
+}
+
 export function getItemById(id: string): EncryptedItem | null {
   try {
     const items = JSON.parse(localStorage.getItem(id) || '[]') as EncryptedItem[]
     return items.filter(x => x.id === id)[0]
+  }
+  catch {
+    return null
+  }
+}
+
+export function buildVault(vaultId: string) {
+  const vault = getVaultById(vaultId)
+
+  if (vault) {
+    const items = getItemList(vaultId) as EncryptedItem[]
+    const data = {
+      ...vault,
+      items: items.map(e => removeProp(e, 'vaultId')),
+    }
+
+    return yaml.dump(data)
+  }
+
+  return null
+}
+
+export function unbuildVault(data: string): { vault: Vault, items: EncryptedItem[] } | null {
+  try {
+    const parsedData: BuildData = yaml.load(data) as BuildData
+    const vault: Vault = parsedData
+    const items: EncryptedItem[] = parsedData.items
+
+    return {
+      vault,
+      items: items.filter(e => e),
+    }
   }
   catch {
     return null

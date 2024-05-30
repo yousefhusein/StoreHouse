@@ -26,3 +26,7 @@ declare interface Vault {
 }
 
 declare type theme = 'light' | 'dark' | 'system'
+
+declare interface BuildData extends Vault {
+  items: EncryptedItem[]
+}

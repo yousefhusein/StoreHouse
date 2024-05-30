@@ -12,7 +12,9 @@ const passwordStore = usePasswordStore()
 const vaults = ref<Vault[]>([])
 const title = ref('')
 const description = ref('')
-const password = ref()
+const password = ref('')
+const hashedPassword = ref('')
+const items = ref<EncryptedItem[]>([])
 const errorMessage = ref('')
 const router = useRouter()
 
@@ -30,10 +32,26 @@ function resetInputs() {
   title.value = ''
   description.value = ''
   password.value = ''
+  hashedPassword.value = ''
 }
 
 function handleClick(vaultId: string) {
   router.push(`/vaults/${vaultId}`)
+}
+
+function handleChange(event: Event) {
+  const element = event.target as HTMLInputElement
+  if (element.files?.[0]) {
+    readFileContent(element.files[0], (error, data) => {
+      if (error)
+        throw error
+      const unbuild = unbuildVault(data!)!
+      title.value = unbuild.vault.title
+      description.value = unbuild.vault.description
+      hashedPassword.value = unbuild.vault.password
+      items.value = unbuild.items
+    })
+  }
 }
 
 function handleCreateVault() {
@@ -46,25 +64,57 @@ function handleCreateVault() {
   })
 
   if (!error) {
-    errorMessage.value = ''
+    if (hashedPassword.value && hashedPassword.value !== hash(value.password)) {
+      errorMessage.value = 'Invalid password'
+    }
+    else {
+      errorMessage.value = ''
 
-    createNewVault({
-      title: value.title,
-      description: description.value,
-      algorithm: 'aes',
-      id: value.id,
-      updatedAt: value.updatedAt,
-      password: hash(password.value!),
-    }, (vaultList) => {
-      vaults.value = vaultList
-      passwordStore.setPassword(password.value, value.id)
-      handleCloseModal()
-      resetInputs()
-      router.push(`/vaults/${value.id}`)
-    })
+      createNewVault({
+        title: value.title,
+        description: description.value,
+        algorithm: 'aes',
+        id: value.id,
+        updatedAt: value.updatedAt,
+        password: hash(password.value!),
+      }, (vaultList) => {
+        if (items.value) {
+          addItems(items.value.map(item => ({
+            data: item.data,
+            id: item.id,
+            vaultId: value.id,
+          })))
+        }
+
+        vaults.value = vaultList
+        passwordStore.setPassword(password.value, value.id)
+        handleCloseModal()
+        resetInputs()
+        router.push(`/vaults/${value.id}`)
+      })
+    }
   }
   else {
     errorMessage.value = error.message
+  }
+}
+
+function downloadVault(label: string, vaultId: string) {
+  const data = buildVault(vaultId)
+  if (data) {
+    const filename = `${label}-${vaultId}.yaml`
+    const blob = new Blob([data], { type: 'text/yaml' })
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+
+    // Programmatically click the link to start the download
+    link.click()
+
+    // Clean up the URL object after the download
+    URL.revokeObjectURL(url)
   }
 }
 
@@ -92,7 +142,7 @@ onMounted(() => {
             :footer-text-end="prettyBytes(calculateVaultSize(item.id)!)"
             class="md:w-1/2 lg:w-1/3"
           >
-            <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" />
+            <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" @click="downloadVault(item.title, item.id)" />
             <UIIconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
           </UIItem>
           <span v-if="!vaults.length">
@@ -122,7 +172,7 @@ onMounted(() => {
     </FormsGroup>
 
     <FormsGroup id="file" label="File" required>
-      <UITextInput id="file" type="file" placeholder="Password" accept=".aes" />
+      <UITextInput id="file" type="file" placeholder="Password" accept=".aes,.yaml,.yml" @change="handleChange($event)" />
     </FormsGroup>
 
     <p class="text-red-700">
