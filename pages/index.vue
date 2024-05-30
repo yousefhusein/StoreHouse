@@ -160,11 +160,11 @@ onMounted(() => {
     submit-button-text="Create"
   >
     <FormsGroup id="title" label="Title" required>
-      <UITextInput id="title" v-model="title" placeholder="My Vault" />
+      <UITextInput id="title" v-model="title" autocomplete="name" placeholder="My Vault" />
     </FormsGroup>
 
     <FormsGroup id="password" label="Password" required>
-      <UITextInput id="password" v-model="password" type="password" placeholder="Password" />
+      <UITextInput id="password" v-model="password" autocomplete="current-password" type="password" placeholder="Password" />
     </FormsGroup>
 
     <FormsGroup id="description" label="Description" required>
