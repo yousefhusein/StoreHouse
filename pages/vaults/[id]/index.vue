@@ -90,6 +90,15 @@ function requestPassword() {
   }
 }
 
+function handleDelete() {
+  // eslint-disable-next-line no-alert
+  if (vault.value && confirm('Are you sure you want to delete this vault? it\'s can\'t be undone.')) {
+    const vaults = getVaultList()
+    saveVaults(vaults.filter(e => e.id !== vault.value!.id))
+    navigateTo('/')
+  }
+}
+
 function handleDeleteItem(itemId: string) {
   // eslint-disable-next-line no-alert
   if (confirm('Are you sure you want to delete this item? You will not be able to return it later.')) {
@@ -124,7 +133,7 @@ onMounted(() => {
         <UITypography class="text-xl font-black">
           {{ vault.title }}
         </UITypography>
-        <UIIconButton icon="heroicons:trash" class="bg-red-700 text-white" />
+        <UIIconButton icon="heroicons:trash" class="bg-red-700 text-white" @click="handleDelete" />
       </UICardHeader>
       <UICardContent>
         <div class="flex flex-wrap h-full overflow-auto" aria-label="vaults">
