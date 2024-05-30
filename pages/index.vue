@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { v4 } from 'uuid'
 import moment from 'moment'
+import prettyBytes from 'pretty-bytes'
+import { hash } from '@yousefhusain/md5'
 import { vaultSchema } from '~/validators/vault'
-import { calculateVaultSize, prettySize } from '~/utils/helpers/calculateSize'
+import { calculateVaultSize } from '~/utils/helpers/calculateSize'
 
 declare const createVaultModal: HTMLDialogElement
 
@@ -73,24 +75,31 @@ onMounted(() => {
 
 <template>
   <UIContainer class="pb-3 h-full">
-    <UICard header-title="Vaults">
-      <div class="flex flex-wrap max-h-[500px] overflow-auto" aria-label="vaults">
-        <UIItem
-          v-for="item in vaults"
-          :key="item?.id"
-          :description="item.description"
-          :label="item.title"
-          :footer-text-start="`Updated At: ${moment(item.updatedAt).format('YYYY/MM/DD hh:mm A')}`"
-          :footer-text-end="prettySize(calculateVaultSize(item.id)!)"
-          class="md:w-1/2 lg:w-1/3"
-        >
-          <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" />
-          <UIIconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
-        </UIItem>
-        <span v-if="!vaults.length">
-          You don't have any vaults yet, <a href="#" class="text-blue-600" @click="$event.preventDefault(), handleShowModal()">Create One</a>.
-        </span>
-      </div>
+    <UICard>
+      <UICardHeader class="justify-center">
+        <UITypography class="text-xl font-black">
+          Vaults
+        </UITypography>
+      </UICardHeader>
+      <UICardContent>
+        <div class="flex flex-wrap overflow-auto" aria-label="vaults">
+          <UIItem
+            v-for="item in vaults"
+            :key="item?.id"
+            :description="item.description"
+            :label="item.title"
+            :footer-text-start="`Updated At: ${moment(item.updatedAt).format('YYYY/MM/DD hh:mm A')}`"
+            :footer-text-end="prettyBytes(calculateVaultSize(item.id)!)"
+            class="md:w-1/2 lg:w-1/3"
+          >
+            <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" />
+            <UIIconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
+          </UIItem>
+          <span v-if="!vaults.length">
+            You don't have any vaults yet, <a href="#" class="text-blue-600" @click="$event.preventDefault(), handleShowModal()">Create One</a>.
+          </span>
+        </div>
+      </UICardContent>
     </UICard>
   </UIContainer>
   <AlertsModal

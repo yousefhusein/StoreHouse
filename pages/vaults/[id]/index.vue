@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { compare } from '@yousefhusain/md5'
 import { v4 } from 'uuid'
 import { itemSchema } from '~/validators/item'
 
@@ -52,8 +53,6 @@ function handleCreateItem() {
           label: _value.label,
           type: _value.type,
           value: _value.value,
-          updatedAt: new Date(),
-          createdAt: new Date(),
         } as Item, password.value),
       })
 
@@ -76,7 +75,7 @@ function requestPassword() {
   const pass = prompt('Enter your password:')
 
   if (pass && pass.trim()) {
-    if (pass && compareHash(pass, vault.value?.password as string)) {
+    if (pass && compare(pass, vault.value?.password as string)) {
       password.value = pass
       updateItems()
     }
@@ -110,7 +109,7 @@ onMounted(() => {
     return navigateTo('/')
 
   const storedPassword = passwordStore.getPassword(vault.value.id)
-  if (storedPassword && compareHash(storedPassword, vault.value.password)) {
+  if (storedPassword && compare(storedPassword, vault.value.password)) {
     password.value = storedPassword
     updateItems()
   }
@@ -119,47 +118,55 @@ onMounted(() => {
 </script>
 
 <template>
-  <UIContainer class="mt-0 h-full">
-    <UICard v-if="vault && password" class="h-full" :header-title="vault.title">
-      <div class="flex flex-wrap h-full overflow-auto" aria-label="vaults">
-        <h1 v-if="!items || items.length < 1">
-          Your vault currently empty
-        </h1>
-        <UIItem
-          v-for="item in items"
-          v-else
-          :key="item.id"
-          class="md:w-1/2 lg:w-1/3"
-          :label="item.label"
-          :description="item.value"
-        >
-          <UIIconButton class="text-white bg-red-700" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
-        </UIItem>
-      </div>
+  <UIContainer class="pb-3 h-full overflow-hidden">
+    <UICard v-if="vault && password" class="h-full">
+      <UICardHeader class="justify-between">
+        <UITypography class="text-xl font-black">
+          {{ vault.title }}
+        </UITypography>
+        <UIIconButton icon="heroicons:trash" class="bg-red-700 text-white" />
+      </UICardHeader>
+      <UICardContent>
+        <div class="flex flex-wrap h-full overflow-auto" aria-label="vaults">
+          <h1 v-if="!items || items.length < 1">
+            Your vault currently empty
+          </h1>
+          <UIItem
+            v-for="item in items"
+            v-else
+            :key="item.id"
+            class="md:w-1/2 lg:w-1/3"
+            :label="item.label"
+            :description="item.value"
+          >
+            <UIIconButton class="text-white bg-red-700" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
+          </UIItem>
+        </div>
+      </UICardContent>
     </UICard>
+    <AlertsModal
+      v-if="password"
+      id="createVaultModal"
+      :handle-close-modal="handleCloseModal"
+      :handle-submit="handleCreateItem"
+      header-title="Create An Item"
+      submit-button-text="Create"
+    >
+      <FormsGroup id="label" label="Label" required>
+        <UITextInput id="label" v-model="label" placeholder="Username, Email, Label" />
+      </FormsGroup>
+
+      <!-- <FormsGroup id="password" label="Password" required>
+        <UITextInput id="password" v-model="password" type="password" placeholder="Password" />
+      </FormsGroup> -->
+
+      <FormsGroup id="value" label="Value" required>
+        <UITextInput id="value" v-model="value" placeholder="Enter a value" />
+      </FormsGroup>
+
+      <p class="text-red-700">
+        {{ errorMessage }}
+      </p>
+    </AlertsModal>
   </UIContainer>
-  <AlertsModal
-    v-if="password"
-    id="createVaultModal"
-    :handle-close-modal="handleCloseModal"
-    :handle-submit="handleCreateItem"
-    header-title="Create An Item"
-    submit-button-text="Create"
-  >
-    <FormsGroup id="label" label="Label" required>
-      <UITextInput id="label" v-model="label" placeholder="Username, Email, Label" />
-    </FormsGroup>
-
-    <!-- <FormsGroup id="password" label="Password" required>
-      <UITextInput id="password" v-model="password" type="password" placeholder="Password" />
-    </FormsGroup> -->
-
-    <FormsGroup id="value" label="Value" required>
-      <UITextInput id="value" v-model="value" placeholder="Enter a value" />
-    </FormsGroup>
-
-    <p class="text-red-700">
-      {{ errorMessage }}
-    </p>
-  </AlertsModal>
 </template>

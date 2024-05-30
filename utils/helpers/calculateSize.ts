@@ -31,7 +31,3 @@ export function calculateItemSize(item: EncryptedItem) {
 export function calculateStringSize(string: string) {
   return new Blob([string]).size
 }
-
-export function prettySize(input: number) {
-  return prettyBytes(input)
-}
