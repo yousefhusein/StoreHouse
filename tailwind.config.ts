@@ -1,10 +1,8 @@
-/**
- * @type {import("tailwindcss").Config}
- */
-export default {
-  darkMode: 'media',
-  plugins: [],
+import type { Config } from "tailwindcss";
+
+export default <Partial<Config>>{
   darkMode: 'class',
+  plugins: [],
   theme: {
     fontFamily: {
       poppins: ['Poppins', 'sans-serif'],
