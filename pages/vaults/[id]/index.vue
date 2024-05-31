@@ -3,6 +3,7 @@ import { compare } from '@yousefhusain/md5'
 import { itemSchema } from '~/validators/item'
 
 declare const createVaultModal: HTMLDialogElement
+declare const editItemModal: HTMLDialogElement
 
 const passwordStore = usePasswordStore()
 const route = useRoute()
@@ -12,15 +13,57 @@ const value = ref('')
 const items = ref<Item[] | null>(null)
 const mounted = ref<boolean>(false)
 const password = ref<string | null>(null)
+const currentItem = ref<Item | null>(null)
 const errorMessage = ref('')
+const editorLabel = ref('')
+const editorValue = ref('')
 
 function handleCloseModal() {
   createVaultModal.close()
 }
 
+function handleEditItem() {
+  if (currentItem.value && password.value) {
+    editItem(currentItem.value.id, password.value, {
+      label: editorLabel.value,
+      value: editorValue.value,
+    }, (error) => {
+      if (error) {
+        errorMessage.value = error.message
+      }
+      else {
+        resetInputs()
+        updateItems()
+        handleCloseEditItemModal()
+      }
+    })
+  }
+}
+
+function handleOpenEditItem(itemId: string) {
+  if (items.value) {
+    const item = items.value.find(item => item.id === itemId)
+    if (item) {
+      currentItem.value = item
+      editorLabel.value = currentItem.value.label
+      editorValue.value = currentItem.value.value
+      editItemModal.showModal()
+    }
+  }
+}
+
+function handleCloseEditItemModal() {
+  editItemModal.close()
+  editorLabel.value = ''
+  editorValue.value = ''
+}
+
 function resetInputs() {
   label.value = ''
   value.value = ''
+  editorLabel.value = ''
+  editorValue.value = ''
+  errorMessage.value = ''
 }
 
 function updateItems() {
@@ -64,17 +107,13 @@ function handleCreateItem() {
   }
 }
 
-// function handleShowModal() {
-//   createVaultModal.showModal()
-// }
-
 function requestPassword() {
   // eslint-disable-next-line no-alert
   const pass = prompt('Enter your password:')
 
-  if (pass && pass.trim()) {
-    if (pass && compare(pass, vault.value?.password as string)) {
-      password.value = pass
+  if (typeof pass === 'string') {
+    if (pass && compare(pass.trim(), vault.value?.password as string)) {
+      password.value = pass.trim()
       updateItems()
     }
     else {
@@ -132,17 +171,17 @@ onUnmounted(() => {
   <LayoutContainer class="pb-3 h-full overflow-hidden">
     <CardContainer v-if="vault && password" class="h-full">
       <CardHeader class="justify-between">
-        <UITypography class="text-xl font-black">
+        <Typography class="text-xl font-black">
           {{ vault.title }}
-        </UITypography>
-        <UIIconButton icon="heroicons:trash" class="bg-red-700 text-white" @click="handleDelete" />
+        </Typography>
+        <IconButton icon="heroicons:trash" class="bg-red-700 text-white" @click="handleDelete" />
       </CardHeader>
       <CardContent>
         <div class="flex flex-wrap h-full overflow-auto" aria-label="vaults">
-          <h1 v-if="!items || items.length < 1">
+          <Typography v-if="!items || items.length < 1" h5>
             Your vault currently empty
-          </h1>
-          <UIItem
+          </Typography>
+          <Item
             v-for="item in items"
             v-else
             :key="item.id"
@@ -150,12 +189,13 @@ onUnmounted(() => {
             :label="item.label"
             :description="item.value"
           >
-            <UIIconButton class="bg-red-700" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
-            <UIIconButton icon="heroicons:pencil-square" @click="handleDeleteItem(item.id)" />
-          </UIItem>
+            <IconButton class="bg-red-700 text-white" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
+            <IconButton class="text-white" icon="heroicons:pencil-square" @click="handleOpenEditItem(item.id)" />
+          </Item>
         </div>
       </CardContent>
     </CardContainer>
+
     <AlertModal
       v-if="password"
       id="createVaultModal"
@@ -172,9 +212,29 @@ onUnmounted(() => {
         <FormInput v-model="value" autocomplete="off" />
       </FormGroup>
 
-      <p class="text-red-700">
+      <Typography class="text-red-700">
         {{ errorMessage }}
-      </p>
+      </Typography>
+    </AlertModal>
+
+    <AlertModal
+      id="editItemModal"
+      header-title="Editor"
+      :handle-close-modal="handleCloseEditItemModal"
+      :handle-submit="handleEditItem"
+      submit-button-text="Save"
+    >
+      <FormGroup label="Label">
+        <FormInput v-model="editorLabel" type="text" placeholder="Enter a label" autocomplete="off" />
+      </FormGroup>
+
+      <FormGroup label="Value">
+        <FormInput v-model="editorValue" type="text" placeholder="Enter a value" autocomplete="off" />
+      </FormGroup>
+
+      <Typography class="text-red-700">
+        {{ errorMessage }}
+      </Typography>
     </AlertModal>
   </LayoutContainer>
 </template>

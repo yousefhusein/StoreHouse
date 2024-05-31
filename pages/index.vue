@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import moment from 'moment'
-import prettyBytes from 'pretty-bytes'
 import { hash } from '@yousefhusain/md5'
 import { vaultSchema } from '~/validators/vault'
 
@@ -115,13 +114,13 @@ onMounted(async () => {
   <LayoutContainer class="pb-3 h-full">
     <CardContainer>
       <CardHeader class="justify-center">
-        <UITypography class="text-xl font-black">
+        <Typography class="text-xl font-black">
           Vaults
-        </UITypography>
+        </Typography>
       </CardHeader>
       <CardContent>
         <div class="flex flex-wrap overflow-auto" aria-label="vaults">
-          <UIItem
+          <Item
             v-for="item in vaults.sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf())"
             :key="item?.id"
             :description="item.description"
@@ -130,9 +129,9 @@ onMounted(async () => {
             :footer-text-end="`Items (${getVaultItemsCount(item.id)})`"
             class="md:w-1/2 lg:w-1/3"
           >
-            <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" @click="downloadVault(item.title, item.id)" />
-            <UIIconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
-          </UIItem>
+            <IconButton class="text-white" icon="heroicons:arrow-down-tray" @click="downloadVault(item.title, item.id)" />
+            <IconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
+          </Item>
           <span v-if="!vaults.length">
             You don't have any vaults yet, <a href="#" class="text-blue-600" @click="$event.preventDefault(), handleShowModal()">Create One</a>.
           </span>
@@ -168,8 +167,8 @@ onMounted(async () => {
       />
     </FormGroup>
 
-    <UITypography class="text-red-700">
+    <Typography class="text-red-700">
       {{ errorMessage }}
-    </UITypography>
+    </Typography>
   </AlertModal>
 </template>

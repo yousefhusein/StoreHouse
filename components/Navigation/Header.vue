@@ -62,11 +62,11 @@ function handleCreateNewVault() {
         StoreHouse
       </NuxtLink>
       <div class="flex flex-row items-center gap-3">
-        <UIIconButton class="bg-transparent text-inherit" :icon="themeIcon[theme]" @click="handleSwitchTheme()" />
-        <UIButton icon-left="heroicons:plus" class="hidden lg:inline-block text-white" @click="handleCreateNewVault">
+        <IconButton class="bg-transparent text-inherit" :icon="themeIcon[theme]" @click="handleSwitchTheme()" />
+        <Button icon-left="heroicons:plus" class="hidden lg:inline-block text-white" @click="handleCreateNewVault">
           Create New
-        </UIButton>
-        <UIIconButton icon="heroicons:plus" class="inline-block lg:hidden text-white" @click="handleCreateNewVault" />
+        </Button>
+        <IconButton icon="heroicons:plus" class="inline-block lg:hidden text-white" @click="handleCreateNewVault" />
       </div>
     </LayoutContainer>
   </nav>

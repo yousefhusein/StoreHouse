@@ -1,4 +1,6 @@
+import type { ValidationError } from 'joi'
 import yaml from 'js-yaml'
+import { itemSchema } from '~/validators/item'
 import { vaultSchemaHashedPassword } from '~/validators/vault'
 
 function checkVault(vault: any): false | Vault {
@@ -13,6 +15,31 @@ function checkVault(vault: any): false | Vault {
       ...value,
     }
   }
+}
+
+export function editItem(itemId: string, plainTextPassword: string, newData: Record<string, any>, callbackfn: (error: ValidationError | null, success: boolean) => void) {
+  const itemList = getItems()
+  const itemIdx = itemList.findIndex(x => x.id === itemId)
+
+  try {
+    if (itemIdx !== -1) {
+      const decryptedItem = decryptItem(itemList[itemIdx], plainTextPassword)!
+      Object.assign(decryptedItem, newData)
+      const { error, value } = itemSchema.validate(decryptedItem)
+      if (error) {
+        callbackfn(error, false)
+      }
+      else if (value) {
+        itemList[itemIdx] = {
+          ...itemList[itemIdx],
+          data: encryptItem(value, plainTextPassword),
+        }
+        saveVaultItems(itemList)
+        callbackfn(null, true)
+      }
+    }
+  }
+  catch (error) {}
 }
 
 export function getVaultList(): Vault[] {
