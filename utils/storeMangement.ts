@@ -1,17 +1,5 @@
-// import { itemSchema } from '~/validators/item'
-import { compare } from '@yousefhusain/md5'
-import { v4 } from 'uuid'
 import yaml from 'js-yaml'
 import { vaultSchemaHashedPassword } from '~/validators/vault'
-
-// function checkItem(item: any): false | Item {
-//   const { error, value } = itemSchema.validate(item)
-//   if (error) {
-//     console.warn(`Skipping ${value.label}, ${error.message}`)
-//     return false
-//   }
-//   else { return value }
-// }
 
 function checkVault(vault: any): false | Vault {
   const { error, value } = vaultSchemaHashedPassword.validate(vault)
@@ -154,7 +142,7 @@ export function unbuildVault(data: string): { vault: Vault, items: EncryptedItem
     const parsedData: BuildData = yaml.load(data) as BuildData
     const vault: Vault = {
       ...parsedData,
-      id: v4(),
+      id: generateId(),
     }
     const items = parsedData.items
 
@@ -163,7 +151,7 @@ export function unbuildVault(data: string): { vault: Vault, items: EncryptedItem
       items: items.filter(e => e).map(i => ({
         ...i,
         vaultId: vault.id,
-        id: v4(),
+        id: generateId(),
       })),
     }
   }

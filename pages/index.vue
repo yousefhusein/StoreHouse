@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { v4 } from 'uuid'
 import moment from 'moment'
 import prettyBytes from 'pretty-bytes'
 import { hash } from '@yousefhusain/md5'
 import { vaultSchema } from '~/validators/vault'
-import { calculateVaultSize } from '~/utils/helpers/calculateSize'
 
 declare const createVaultModal: HTMLDialogElement
 
@@ -14,10 +12,12 @@ const title = ref('')
 const description = ref('')
 const password = ref('')
 const hashedPassword = ref('')
+const filePath = ref('')
 const items = ref<EncryptedItem[]>([])
 const errorMessage = ref('')
 
 function handleCloseModal() {
+  resetInputs()
   createVaultModal.close()
 }
 
@@ -31,7 +31,9 @@ function resetInputs() {
   title.value = ''
   description.value = ''
   password.value = ''
+  items.value = []
   hashedPassword.value = ''
+  filePath.value = ''
 }
 
 function handleClick(vaultId: string) {
@@ -55,7 +57,7 @@ function handleChange(event: Event) {
 
 function handleCreateVault() {
   const { error, value } = vaultSchema.validate({
-    id: v4(),
+    id: generateId(),
     title: title.value,
     password: password.value,
     description: description.value,
@@ -110,22 +112,22 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UIContainer class="pb-3 h-full">
-    <UICard>
-      <UICardHeader class="justify-center">
+  <LayoutContainer class="pb-3 h-full">
+    <CardContainer>
+      <CardHeader class="justify-center">
         <UITypography class="text-xl font-black">
           Vaults
         </UITypography>
-      </UICardHeader>
-      <UICardContent>
+      </CardHeader>
+      <CardContent>
         <div class="flex flex-wrap overflow-auto" aria-label="vaults">
           <UIItem
-            v-for="item in vaults"
+            v-for="item in vaults.sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf())"
             :key="item?.id"
             :description="item.description"
             :label="item.title"
             :footer-text-start="`Updated At: ${moment(item.updatedAt).format('YYYY/MM/DD hh:mm A')}`"
-            :footer-text-end="`${prettyBytes(calculateVaultSize(item.id)!)} (${getVaultItemsCount(item.id)})`"
+            :footer-text-end="`Items (${getVaultItemsCount(item.id)})`"
             class="md:w-1/2 lg:w-1/3"
           >
             <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" @click="downloadVault(item.title, item.id)" />
@@ -135,34 +137,39 @@ onMounted(async () => {
             You don't have any vaults yet, <a href="#" class="text-blue-600" @click="$event.preventDefault(), handleShowModal()">Create One</a>.
           </span>
         </div>
-      </UICardContent>
-    </UICard>
-  </UIContainer>
-  <AlertsModal
+      </CardContent>
+    </CardContainer>
+  </LayoutContainer>
+  <AlertModal
     id="createVaultModal"
     :handle-close-modal="handleCloseModal"
     :handle-submit="handleCreateVault"
     header-title="Create A Vault"
     submit-button-text="Create"
   >
-    <FormsGroup id="title" label="Title" required>
-      <UITextInput id="title" v-model="title" autocomplete="name" placeholder="My Vault" />
-    </FormsGroup>
+    <FormGroup label="Title">
+      <FormInput v-model="title" autocomplete="off" placeholder="My Vault" />
+    </FormGroup>
 
-    <FormsGroup id="password" label="Password" required>
-      <UITextInput id="password" v-model="password" autocomplete="current-password" type="password" placeholder="Password" />
-    </FormsGroup>
+    <FormGroup label="Password">
+      <FormInput v-model="password" autocomplete="off" type="password" placeholder="Password" />
+    </FormGroup>
 
-    <FormsGroup id="description" label="Description" required>
-      <UITextInput id="description" v-model="description" placeholder="Enter a text..." />
-    </FormsGroup>
+    <FormGroup label="Description">
+      <FormInput v-model="description" placeholder="Enter a text..." />
+    </FormGroup>
 
-    <FormsGroup id="file" label="File" required>
-      <UITextInput id="file" type="file" placeholder="Password" accept=".aes,.yaml,.yml" @change="handleChange($event)" />
-    </FormsGroup>
+    <FormGroup label="File">
+      <FormInput
+        v-model="filePath"
+        type="file"
+        accept=".aes,.yaml,.yml"
+        @change="handleChange($event)"
+      />
+    </FormGroup>
 
-    <p class="text-red-700">
+    <UITypography class="text-red-700">
       {{ errorMessage }}
-    </p>
-  </AlertsModal>
+    </UITypography>
+  </AlertModal>
 </template>

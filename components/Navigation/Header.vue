@@ -57,7 +57,7 @@ function handleCreateNewVault() {
 
 <template>
   <nav class="py-6">
-    <UIContainer class="flex items-center justify-between">
+    <LayoutContainer class="flex items-center justify-between">
       <NuxtLink to="/" class="text-2xl font-black">
         StoreHouse
       </NuxtLink>
@@ -68,6 +68,6 @@ function handleCreateNewVault() {
         </UIButton>
         <UIIconButton icon="heroicons:plus" class="inline-block lg:hidden text-white" @click="handleCreateNewVault" />
       </div>
-    </UIContainer>
+    </LayoutContainer>
   </nav>
 </template>

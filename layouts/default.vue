@@ -8,9 +8,7 @@ useHead({
 <template>
   <Body class="font-poppins dark:text-white dark:bg-gray-950 flex">
     <div class="flex flex-col h-full w-full">
-      <header aria-label="content header">
-        <NavigationsHeader />
-      </header>
+      <NavigationHeader />
       <slot />
     </div>
   </Body>
