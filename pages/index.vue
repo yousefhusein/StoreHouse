@@ -16,7 +16,6 @@ const password = ref('')
 const hashedPassword = ref('')
 const items = ref<EncryptedItem[]>([])
 const errorMessage = ref('')
-const router = useRouter()
 
 function handleCloseModal() {
   createVaultModal.close()
@@ -36,7 +35,7 @@ function resetInputs() {
 }
 
 function handleClick(vaultId: string) {
-  router.push(`/vaults/${vaultId}`)
+  navigateTo(`/vaults/${vaultId}`)
 }
 
 function handleChange(event: Event) {
@@ -90,7 +89,7 @@ function handleCreateVault() {
         passwordStore.setPassword(password.value, value.id)
         handleCloseModal()
         resetInputs()
-        router.push(`/vaults/${value.id}`)
+        navigateTo(`/vaults/${value.id}`)
       })
     }
   }
@@ -101,25 +100,12 @@ function handleCreateVault() {
 
 function downloadVault(label: string, vaultId: string) {
   const data = buildVault(vaultId)
-  if (data) {
-    const filename = `${label}-${vaultId}.yaml`
-    const blob = new Blob([data], { type: 'text/yaml' })
-    const url = URL.createObjectURL(blob)
-
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-
-    // Programmatically click the link to start the download
-    link.click()
-
-    // Clean up the URL object after the download
-    URL.revokeObjectURL(url)
-  }
+  download(`${label}-${vaultId}`, 'yaml', data!)
 }
 
-onMounted(() => {
-  vaults.value = getVaultList()
+onMounted(async () => {
+  const vaultList = getVaultList()
+  vaults.value = vaultList
 })
 </script>
 
@@ -139,7 +125,7 @@ onMounted(() => {
             :description="item.description"
             :label="item.title"
             :footer-text-start="`Updated At: ${moment(item.updatedAt).format('YYYY/MM/DD hh:mm A')}`"
-            :footer-text-end="prettyBytes(calculateVaultSize(item.id)!)"
+            :footer-text-end="`${prettyBytes(calculateVaultSize(item.id)!)} (${getVaultItemsCount(item.id)})`"
             class="md:w-1/2 lg:w-1/3"
           >
             <UIIconButton class="text-white" icon="heroicons:arrow-down-tray" @click="downloadVault(item.title, item.id)" />

@@ -7,7 +7,6 @@ declare const createVaultModal: HTMLDialogElement
 
 const passwordStore = usePasswordStore()
 const route = useRoute()
-const router = useRouter()
 const vault = ref<Vault | null>(null)
 const label = ref('')
 const value = ref('')
@@ -86,7 +85,7 @@ function requestPassword() {
     }
   }
   else {
-    router.push('/')
+    navigateTo('/')
   }
 }
 
@@ -124,6 +123,10 @@ onMounted(() => {
   }
   else { requestPassword() }
 })
+
+onUnmounted(() => {
+  passwordStore.clean()
+})
 </script>
 
 <template>
@@ -148,7 +151,8 @@ onMounted(() => {
             :label="item.label"
             :description="item.value"
           >
-            <UIIconButton class="text-white bg-red-700" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
+            <UIIconButton class="bg-red-700" icon="heroicons:trash" @click="handleDeleteItem(item.id)" />
+            <UIIconButton icon="heroicons:pencil-square" @click="handleDeleteItem(item.id)" />
           </UIItem>
         </div>
       </UICardContent>

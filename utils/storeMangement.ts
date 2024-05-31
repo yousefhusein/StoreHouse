@@ -97,6 +97,11 @@ export function createNewVault(details: Vault, callbackfn: (vault: Vault[]) => v
   }
 }
 
+export function getVaultItemsCount(vaultId: string) {
+  const items = getItemList(vaultId)
+  return items?.length || 0
+}
+
 export function getVaultById(id: string): Vault | null {
   const vaults = getVaultList()
   return vaults.filter(x => x.id === id)[0] || null

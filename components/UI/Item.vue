@@ -23,9 +23,9 @@ defineProps<PropsType>()
           <slot />
         </div>
       </div>
-      <div v-if="footerTextStart || footerTextEnd" class="px-4 py-1 w-full border-t border-t-inherit flex flex-row flex-wrap justify-between overflow-auto">
-        <small>{{ footerTextStart }}</small>
-        <small>{{ footerTextEnd }}</small>
+      <div v-if="footerTextStart || footerTextEnd" class="px-4 py-1 w-full border-t border-t-inherit flex items-center justify-between">
+        <small class="text-[10px] sm:text-[14px] md:text-sm">{{ footerTextStart }}</small>
+        <small class="text-sm">{{ footerTextEnd }}</small>
       </div>
     </div>
   </div>

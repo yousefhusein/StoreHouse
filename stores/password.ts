@@ -18,8 +18,8 @@ export const usePasswordStore = defineStore('counter', {
     hasPassword(vaultId: string): boolean {
       return Boolean(this.plainTextPassword[vaultId])
     },
-    removePassword(vaultId: string) {
-      delete this.plainTextPassword[vaultId]
+    clean() {
+      this.plainTextPassword = {}
     },
   },
 })
