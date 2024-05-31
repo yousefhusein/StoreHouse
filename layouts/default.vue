@@ -6,23 +6,18 @@ useHead({
 </script>
 
 <template>
-  <Body class="font-poppins dark:text-white dark:bg-gray-950 flex">
-    <div class="flex flex-col h-full w-full">
-      <NavigationHeader />
-      <slot />
-    </div>
+  <Body class="font-poppins dark:text-white dark:bg-gray-950">
+    <NavigationHeader />
+    <slot />
   </Body>
 </template>
 
 <style>
-html, body {
-  height: 100%;
-  width: 100%;
+::-webkit-scrollbar {
+  background-color: transparent;
+  width: 4px;
 }
-
-body > div#__nuxt {
-  width: 100%;
-  flex: 1;
-  flex-grow: 3;
+::-webkit-scrollbar-thumb {
+  background-color: #ccc;
 }
 </style>

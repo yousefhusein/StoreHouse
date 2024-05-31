@@ -111,7 +111,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <LayoutContainer class="pb-3 h-full">
+  <LayoutContainer class="pb-3">
     <CardContainer>
       <CardHeader class="justify-center">
         <Typography class="text-xl font-black">
@@ -119,7 +119,7 @@ onMounted(async () => {
         </Typography>
       </CardHeader>
       <CardContent>
-        <div class="flex flex-wrap overflow-auto" aria-label="vaults">
+        <div class="flex flex-wrap overflow-auto h-[calc(100vh-200px)] min-h-400px" aria-label="vaults">
           <Item
             v-for="item in vaults.sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf())"
             :key="item?.id"

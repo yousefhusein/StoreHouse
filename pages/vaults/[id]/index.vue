@@ -168,16 +168,16 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <LayoutContainer class="pb-3 h-full overflow-hidden">
-    <CardContainer v-if="vault && password" class="h-full">
+  <LayoutContainer class="pb-3 overflow-hidden">
+    <CardContainer v-if="vault && password">
       <CardHeader class="justify-between">
         <Typography class="text-xl font-black">
           {{ vault.title }}
         </Typography>
         <IconButton icon="heroicons:trash" class="bg-red-700 text-white" @click="handleDelete" />
       </CardHeader>
-      <CardContent>
-        <div class="flex flex-wrap h-full overflow-auto" aria-label="vaults">
+      <CardContent class="overflow-auto h-[calc(100vh-200px)] min-h-400px">
+        <div class="flex flex-wrap overflow-auto" aria-label="vaults">
           <Typography v-if="!items || items.length < 1" h5>
             Your vault currently empty
           </Typography>
