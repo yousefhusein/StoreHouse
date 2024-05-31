@@ -5,7 +5,7 @@ export default <Partial<Config>>{
   plugins: [],
   theme: {
     fontFamily: {
-      poppins: ['Poppins', 'sans-serif'],
+      poppins: ['Poppins', 'Tajawal', 'sans-serif'],
     },
   },
 }

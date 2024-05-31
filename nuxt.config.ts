@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   googleFonts: {
     families: {
       Poppins: ['300', '400', '500', '600', '900'],
+      Tajawal: ['300', '400', '500', '600', '900'],
     },
   },
 })
