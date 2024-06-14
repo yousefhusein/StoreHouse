@@ -7,12 +7,20 @@ useHead({
 
 <template>
   <Body class="font-poppins dark:text-white dark:bg-gray-950">
-    <NavigationHeader />
-    <slot />
+    <div class="h-full flex flex-col">
+      <NavigationHeader />
+      <LayoutContainer class="pb-5 ">
+        <slot />
+      </LayoutContainer>
+    </div>
   </Body>
 </template>
 
 <style>
+html, body, #__nuxt {
+  height: 100%;
+}
+
 ::-webkit-scrollbar {
   background-color: transparent;
   width: 4px;

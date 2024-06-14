@@ -111,34 +111,39 @@ onMounted(async () => {
 </script>
 
 <template>
-  <LayoutContainer class="pb-3">
-    <CardContainer>
-      <CardHeader class="justify-center">
-        <Typography class="text-xl font-black">
-          Vaults
-        </Typography>
-      </CardHeader>
-      <CardContent>
-        <div class="flex flex-wrap overflow-auto h-[calc(100vh-200px)] min-h-400px" aria-label="vaults">
-          <Item
-            v-for="item in vaults.sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf())"
-            :key="item?.id"
-            :description="item.description"
-            :label="item.title"
-            :footer-text-start="`Updated At: ${moment(item.updatedAt).format('YYYY/MM/DD hh:mm A')}`"
-            :footer-text-end="`Items (${getVaultItemsCount(item.id)})`"
-            class="md:w-1/2 lg:w-1/3"
-          >
+  <CardContainer>
+    <CardHeader class="justify-center">
+      <Typography class="text-xl font-black">
+        Vaults
+      </Typography>
+    </CardHeader>
+    <CardContent>
+      <div class="flex flex-col md:flex-row md:flex-wrap">
+        <Item
+          v-for="item in vaults.sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf())"
+          :key="item?.id"
+        >
+          <template #content>
+            <p>{{ item.title }}</p>
+            <small>{{ item.description }}</small>
+          </template>
+          <template #actions>
             <IconButton class="text-white" icon="heroicons:arrow-down-tray" @click="downloadVault(item.title, item.id)" />
             <IconButton class="text-white" icon="heroicons:pencil-square" @click="handleClick(item.id)" />
-          </Item>
-          <span v-if="!vaults.length">
-            You don't have any vaults yet, <a href="#" class="text-blue-600" @click="$event.preventDefault(), handleShowModal()">Create One</a>.
-          </span>
-        </div>
-      </CardContent>
-    </CardContainer>
-  </LayoutContainer>
+          </template>
+          <template #footer>
+            <small class="text-[10px] sm:text-[14px] md:text-sm">
+              Updated At: {{ moment(item.updatedAt).format('YYYY/MM/DD hh:mm A') }}
+            </small>
+            <small>Items ({{ getVaultItemsCount(item.id) }})</small>
+          </template>
+        </Item>
+      </div>
+      <span v-if="!vaults.length">
+        You don't have any vaults yet, <a href="#" class="text-blue-600" @click="$event.preventDefault(), handleShowModal()">Create One</a>.
+      </span>
+    </CardContent>
+  </CardContainer>
   <AlertModal
     id="createVaultModal"
     :handle-close-modal="handleCloseModal"
